@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مركز القيادة التشغيلي — البحر الأحمر</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#080e1a;--surface:#0d1525;--panel:#111d30;--card:#162035;--card-h:#1c2940;
+  --border:rgba(255,255,255,0.06);--border-md:rgba(255,255,255,0.10);--border-hi:rgba(255,255,255,0.16);
+  --teal:#00d4aa;--teal-s:rgba(0,212,170,0.10);--teal-g:rgba(0,212,170,0.04);
+  --amber:#f0a500;--amber-s:rgba(240,165,0,0.10);
+  --red:#e85050;--red-s:rgba(232,80,80,0.10);
+  --blue:#4a9eff;--blue-s:rgba(74,158,255,0.10);
+  --violet:#9b7fe8;--violet-s:rgba(155,127,232,0.10);
+  --rose:#e8749b;--rose-s:rgba(232,116,155,0.10);
+  --sage:#5ec97e;--sage-s:rgba(94,201,126,0.10);
+  --t1:#dde4f0;--t2:#7d90a8;--t3:#3f5068;--t4:#2a3a50;
+  --font:'Tajawal',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:20px;
+  --sw:220px;--hh:58px;--nh:42px;
+}
+html,body{height:100%;font-family:var(--font);background:var(--ink);color:var(--t1);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:var(--border-md);border-radius:99px}
+button{font-family:var(--font);cursor:pointer}
+input,textarea,select{font-family:var(--font)}
+
+/* SHELL */
+.shell{display:grid;grid-template-rows:var(--hh) var(--nh) 1fr;grid-template-columns:var(--sw) 1fr;grid-template-areas:"hdr hdr""nav nav""sb main";height:100vh;overflow:hidden}
+
+/* HEADER */
+.hdr{grid-area:hdr;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:relative;z-index:100}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent);opacity:.25}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-orb{width:32px;height:32px;border-radius:50%;background:conic-gradient(var(--teal) 0deg,var(--blue) 120deg,var(--violet) 240deg,var(--teal) 360deg);animation:spin 12s linear infinite;position:relative;flex-shrink:0}
+.logo-orb::after{content:'';position:absolute;inset:4px;border-radius:50%;background:var(--surface)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo h1{font-size:14px;font-weight:700;color:var(--t1)}
+.logo p{font-size:11px;color:var(--t3);font-weight:300}
+.hdr-r{display:flex;align-items:center;gap:12px}
+.pill{display:flex;align-items:center;gap:6px;padding:4px 12px;background:var(--teal-s);border:1px solid rgba(0,212,170,0.18);border-radius:99px;font-size:11px;font-weight:500;color:var(--teal)}
+.pdot{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pa 2.5s ease-in-out infinite}
+@keyframes pa{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.clock{font-family:var(--mono);font-size:12px;color:var(--t3);letter-spacing:1px;direction:ltr;min-width:64px;text-align:center}
+
+/* SYNC INDICATOR */
+.sync-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;border:1px solid;transition:all .3s;white-space:nowrap}
+.sync-ok   {background:var(--teal-s);border-color:rgba(0,212,170,0.2);color:var(--teal)}
+.sync-saving{background:var(--amber-s);border-color:rgba(240,165,0,0.2);color:var(--amber)}
+.sync-err  {background:var(--red-s);border-color:rgba(232,80,80,0.2);color:var(--red)}
+.sync-load {background:var(--blue-s);border-color:rgba(74,158,255,0.2);color:var(--blue)}
+@keyframes rotate{to{transform:rotate(360deg)}}
+.spin-icon{display:inline-block;animation:rotate .8s linear infinite}
+
+/* NAV */
+.nav{grid-area:nav;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:stretch;padding:0 16px;gap:2px;overflow-x:auto}
+.nav::-webkit-scrollbar{height:0}
+.ntab{display:flex;align-items:center;gap:7px;padding:0 14px;font-family:var(--font);font-size:13px;font-weight:500;color:var(--t3);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .18s}
+.ntab:hover{color:var(--t1);background:var(--teal-g)}
+.ntab.on{color:var(--teal);border-bottom-color:var(--teal);background:var(--teal-g)}
+
+/* SIDEBAR */
+.sb{grid-area:sb;background:var(--surface);border-left:1px solid var(--border);overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:18px}
+.sb-gl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.8px;color:var(--t4);padding:0 8px;margin-bottom:4px}
+.sb-g{display:flex;flex-direction:column;gap:1px}
+.sbi{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r-md);cursor:pointer;font-size:13px;color:var(--t2);border:1px solid transparent;transition:all .15s;user-select:none}
+.sbi:hover{background:var(--card);color:var(--t1);border-color:var(--border)}
+.sbi.on{background:var(--teal-s);color:var(--teal);border-color:rgba(0,212,170,0.15)}
+.sbi-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sbi-ct{margin-right:auto;font-family:var(--mono);font-size:10px;color:var(--t3);background:var(--card);padding:2px 6px;border-radius:99px}
+
+/* MAIN */
+.main{grid-area:main;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px}
+
+/* VIEWS */
+.view{display:none;flex-direction:column;gap:16px}
+.view.on{display:flex}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.view.on>*{animation:fi .22s ease both}
+.view.on>*:nth-child(1){animation-delay:0s}
+.view.on>*:nth-child(2){animation-delay:.04s}
+.view.on>*:nth-child(3){animation-delay:.08s}
+.view.on>*:nth-child(4){animation-delay:.12s}
+.view.on>*:nth-child(5){animation-delay:.16s}
+
+/* SECTION HEADER */
+.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.stitle{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--t1)}
+.stitle::before{content:'';width:3px;height:15px;background:var(--teal);border-radius:99px;display:block}
+.slink{font-size:12px;color:var(--teal);cursor:pointer;opacity:.75;transition:opacity .15s;background:none;border:none;padding:0}
+.slink:hover{opacity:1}
+
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;border-radius:0 var(--r-lg) var(--r-lg) 0}
+.kpi.t::before{background:var(--teal)}.kpi.a::before{background:var(--amber)}
+.kpi.r::before{background:var(--red)}.kpi.b::before{background:var(--blue)}
+.kpi-l{font-size:11px;color:var(--t3);margin-bottom:5px}
+.kpi-n{font-size:28px;font-weight:900;line-height:1;margin-bottom:4px}
+.kpi-n.t{color:var(--teal)}.kpi-n.a{color:var(--amber)}.kpi-n.r{color:var(--red)}.kpi-n.b{color:var(--blue)}
+.kpi-s{font-size:11px;color:var(--t3)}
+
+/* STATUS BADGES */
+.badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.s-inprog {background:rgba(0,212,170,.12);color:#00d4aa}
+.s-blocked{background:rgba(232,80,80,.12);color:#e85050}
+.s-explore{background:rgba(74,158,255,.12);color:#4a9eff}
+.s-wait   {background:rgba(240,165,0,.12);color:#f0a500}
+.s-stable {background:rgba(155,127,232,.12);color:#9b7fe8}
+.s-research{background:rgba(232,116,155,.12);color:#e8749b}
+.s-struct {background:rgba(94,201,126,.12);color:#5ec97e}
+
+/* DOMAIN GRID */
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px 15px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s;position:relative}
+.dcard:hover{background:var(--card-h);border-color:var(--border-md);transform:translateY(-1px)}
+.dcard.sel{border-color:var(--teal);background:var(--teal-g)}
+.dc-r1{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;gap:6px}
+.dc-name{font-size:13px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:7px;min-width:0}
+.dc-name-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dc-bar-t{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.dc-bar-f{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.34,1.56,.64,1)}
+.dc-foot{display:flex;align-items:center;gap:8px}
+.dc-pct{font-family:var(--mono);font-size:11px;font-weight:500}
+.dc-blk{font-size:11px;color:var(--t3);margin-right:auto}
+.dc-next{font-size:11px;color:var(--t3);margin-top:6px;display:flex;align-items:flex-start;gap:5px}
+.dc-next::before{content:'▸';color:var(--teal);font-size:10px;flex-shrink:0;margin-top:2px}
+.dc-edit-btn{position:absolute;top:10px;left:10px;width:24px;height:24px;border-radius:var(--r-sm);background:var(--panel);border:1px solid var(--border);color:var(--t3);font-size:13px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.dcard:hover .dc-edit-btn{opacity:1}
+.dc-edit-btn:hover{color:var(--teal);border-color:rgba(0,212,170,.3);background:var(--teal-s)}
+
+/* DETAIL PANEL */
+.dpanel{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.dp-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dp-title{font-size:13px;font-weight:700;color:var(--t1)}
+.dp-hd-r{display:flex;align-items:center;gap:8px}
+.dp-body{display:grid;grid-template-columns:1fr 1fr}
+.dp-col{padding:14px 16px}
+.dp-col+.dp-col{border-right:1px solid var(--border)}
+.dp-cl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--t4);margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+.dp-item{display:flex;align-items:flex-start;gap:7px;margin-bottom:7px;font-size:12px;color:var(--t2);line-height:1.5}
+.dp-dot{flex-shrink:0;margin-top:5px;width:5px;height:5px;border-radius:50%}
+.dp-item-del{margin-right:auto;background:none;border:none;color:var(--t4);font-size:11px;cursor:pointer;padding:1px 4px;border-radius:3px;transition:all .15s;flex-shrink:0}
+.dp-item-del:hover{color:var(--red);background:var(--red-s)}
+.dp-add-row{display:flex;align-items:center;gap:6px;margin-top:6px}
+.dp-add-input{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:var(--r-md);padding:5px 10px;font-size:12px;color:var(--t1);outline:none;transition:border-color .15s}
+.dp-add-input:focus{border-color:rgba(0,212,170,.35)}
+.dp-add-input::placeholder{color:var(--t4)}
+.dp-add-btn{background:var(--teal-s);border:1px solid rgba(0,212,170,.2);border-radius:var(--r-md);padding:5px 11px;font-size:12px;color:var(--teal);transition:all .15s}
+.dp-add-btn:hover{background:rgba(0,212,170,.2)}
+
+/* INTEL GRID */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.icard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 15px}
+.icard-hd{font-size:12px;font-weight:700;margin-bottom:10px}
+.iitem{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--t2)}
+.iitem:last-child{border-bottom:none}
+.idot{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0}
+
+/* LIST TABLE */
+.lcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.lrow{display:flex;align-items:flex-start;gap:12px;padding:11px 15px;border-bottom:1px solid var(--border);transition:background .15s}
+.lrow:last-child{border-bottom:none}
+.lrow:hover{background:var(--card-h)}
+.ptag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;flex-shrink:0;width:52px;text-align:center;margin-top:1px}
+.ph{background:var(--red-s);color:#e85050}.pm{background:var(--amber-s);color:#f0a500}
+.pl{background:var(--sage-s);color:#5ec97e}.pu{background:var(--red-s);color:#e85050}
+.ltext{font-size:12px;color:var(--t2);flex:1;line-height:1.55}
+.ldomain{font-size:11px;color:var(--t4);flex-shrink:0;white-space:nowrap;margin-top:2px}
+
+/* KNOWLEDGE */
+.kvgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kvc{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:13px 15px;transition:border-color .15s}
+.kvc:hover{border-color:var(--border-md)}
+.kvtag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;margin-bottom:8px}
+.kvbody{font-size:12px;color:var(--t2);line-height:1.65;margin-bottom:9px}
+.kvsrc{font-size:10px;color:var(--t4);font-family:var(--mono)}
+
+/* ROADMAP */
+.rmcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.rm-pb{height:4px;background:var(--border);position:relative}
+.rm-pf{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));transition:width .8s ease}
+.rm-pt{position:absolute;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 3px rgba(0,212,170,.2)}
+.rm-phases{display:grid;grid-template-columns:repeat(4,1fr)}
+.rm-ph{padding:14px;border-left:1px solid var(--border)}
+.rm-ph:last-child{border-left:none}
+.rm-ph.now{background:var(--teal-g)}
+.rm-ph-n{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--t4);margin-bottom:4px}
+.rm-ph.now .rm-ph-n{color:var(--teal)}
+.rm-ph-t{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:10px}
+.rm-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3);margin-bottom:4px}
+.rm-item::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;flex-shrink:0}
+.rm-ph.now .rm-item{color:rgba(0,212,170,.7)}
+.rm-ok{color:var(--teal) !important}
+
+/* MATURITY */
+.matgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mati{background:var(--panel);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px}
+.mati-n{font-size:12px;color:var(--t2);margin-bottom:7px}
+.mati-b{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:5px}
+.mati-f{height:100%;border-radius:99px}
+.mati-p{font-family:var(--mono);font-size:10px}
+
+/* TAB FILTER */
+.tab-row{display:flex;gap:4px;flex-wrap:wrap}
+.tbtn{padding:5px 13px;border-radius:99px;font-family:var(--font);font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--panel);color:var(--t3);cursor:pointer;transition:all .15s}
+.tbtn:hover{color:var(--t1);border-color:var(--border-md)}
+.tbtn.on{background:var(--teal-s);color:var(--teal);border-color:rgba(0,212,170,.2)}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:8px}
+.tbr-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:var(--r-md);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid;white-space:nowrap;font-family:var(--font)}
+.tbr-add{background:var(--teal-s);border-color:rgba(0,212,170,.25);color:var(--teal)}
+.tbr-add:hover{background:rgba(0,212,170,.18)}
+.tbr-export{background:var(--card);border-color:var(--border-md);color:var(--t2)}
+.tbr-export:hover{color:var(--t1);border-color:var(--border-hi)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.overlay.hidden{display:none}
+.modal{background:var(--panel);border:1px solid var(--border-md);border-radius:var(--r-xl);width:100%;max-width:540px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column}
+.modal-hd{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--panel);z-index:1;border-radius:var(--r-xl) var(--r-xl) 0 0}
+.modal-title{font-size:15px;font-weight:700;color:var(--t1)}
+.modal-close{background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);width:28px;height:28px;color:var(--t2);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.modal-close:hover{border-color:var(--border-hi);color:var(--t1)}
+.modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.modal-ft{padding:14px 20px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--panel);border-radius:0 0 var(--r-xl) var(--r-xl)}
+
+/* FORM */
+.fgroup{display:flex;flex-direction:column;gap:5px}
+.flabel{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px}
+.finput,.fselect,.ftextarea{background:var(--card);border:1px solid var(--border-md);border-radius:var(--r-md);padding:8px 12px;font-size:13px;color:var(--t1);outline:none;transition:border-color .15s;width:100%}
+.finput:focus,.fselect:focus,.ftextarea:focus{border-color:rgba(0,212,170,.4)}
+.finput::placeholder,.ftextarea::placeholder{color:var(--t4)}
+.fselect{cursor:pointer}
+.fselect option{background:var(--panel);color:var(--t1)}
+.ftextarea{resize:vertical;min-height:72px;line-height:1.6}
+.frange-wrap{display:flex;align-items:center;gap:10px}
+.frange{flex:1;accent-color:var(--teal);cursor:pointer}
+.frange-val{font-family:var(--mono);font-size:12px;color:var(--teal);min-width:36px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.color-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.cpick{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.cpick.sel{border-color:var(--t1);transform:scale(1.2)}
+.ftag-list{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.ftag-item{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:6px 10px;font-size:12px;color:var(--t2)}
+.ftag-item-txt{flex:1}
+.ftag-del{background:none;border:none;color:var(--t4);font-size:14px;cursor:pointer;padding:0 3px;border-radius:3px;transition:color .15s;line-height:1}
+.ftag-del:hover{color:var(--red)}
+.ftag-add-row{display:flex;gap:6px;margin-top:4px}
+.ftag-inp{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:6px 10px;font-size:12px;color:var(--t1);outline:none;transition:border-color .15s}
+.ftag-inp:focus{border-color:rgba(0,212,170,.35)}
+.ftag-inp::placeholder{color:var(--t4)}
+.ftag-add{background:var(--teal-s);border:1px solid rgba(0,212,170,.2);border-radius:var(--r-md);padding:6px 12px;font-size:12px;color:var(--teal);transition:all .15s}
+.ftag-add:hover{background:rgba(0,212,170,.2)}
+
+/* BUTTONS */
+.btn-primary{background:var(--teal);border:none;border-radius:var(--r-md);padding:8px 20px;font-size:13px;font-weight:600;color:#000;cursor:pointer;transition:opacity .15s}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:var(--card);border:1px solid var(--border-md);border-radius:var(--r-md);padding:8px 16px;font-size:13px;color:var(--t2);cursor:pointer;transition:all .15s}
+.btn-secondary:hover{color:var(--t1);border-color:var(--border-hi)}
+.btn-danger{background:var(--red-s);border:1px solid rgba(232,80,80,.2);border-radius:var(--r-md);padding:8px 16px;font-size:13px;color:var(--red);cursor:pointer;transition:all .15s;margin-left:auto}
+.btn-danger:hover{background:rgba(232,80,80,.2)}
+.hidden{display:none!important}
+
+/* CONFIRM */
+.confirm-box{background:var(--panel);border:1px solid var(--border-md);border-radius:var(--r-xl);padding:24px;max-width:360px;width:100%;text-align:center}
+.confirm-icon{font-size:28px;margin-bottom:12px}
+.confirm-title{font-size:15px;font-weight:700;color:var(--t1);margin-bottom:8px}
+.confirm-msg{font-size:13px;color:var(--t2);margin-bottom:18px;line-height:1.6}
+.confirm-btns{display:flex;gap:8px;justify-content:center}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--panel);border:1px solid var(--border-md);border-radius:var(--r-lg);padding:10px 18px;font-size:13px;color:var(--t1);z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:var(--t3);font-size:13px;gap:10px;text-align:center;grid-column:1/-1}
+.empty-icon{font-size:32px;opacity:.5}
+
+/* OFFLINE BANNER */
+.offline-bar{background:var(--amber-s);border-bottom:1px solid rgba(240,165,0,.2);padding:6px 20px;font-size:12px;color:var(--amber);text-align:center;display:none}
+.offline-bar.show{display:block}
+</style>
+</head>
+<body>
+
+<!-- OFFLINE BANNER -->
+<div class="offline-bar" id="offline-bar">⚠ أنت غير متصل بالإنترنت — التغييرات محفوظة محلياً وستُزامَن عند عودة الاتصال</div>
+
+<div class="shell">
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="logo">
+    <div class="logo-orb"></div>
+    <div><h1>مركز القيادة التشغيلي</h1><p>منصة البحر الأحمر للسياحة البحرية</p></div>
+  </div>
+  <div class="hdr-r">
+    <div class="sync-badge sync-load" id="sync-badge"><span class="spin-icon">↻</span> جارٍ التحميل...</div>
+    <div class="pill"><div class="pdot"></div>نشط — المرحلة الأولى</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="ntab on"  onclick="gv('dashboard',this)">📊 نظرة عامة</button>
+  <button class="ntab"     onclick="gv('domains',this)">🗂 المجالات</button>
+  <button class="ntab"     onclick="gv('review',this)">🔍 المراجعة اليومية</button>
+  <button class="ntab"     onclick="gv('risks',this)">⚠ المخاطر والقرارات</button>
+  <button class="ntab"     onclick="gv('knowledge',this)">📚 قاعدة المعرفة</button>
+  <button class="ntab"     onclick="gv('roadmap',this)">🗺 خارطة الطريق</button>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sb" id="sidebar"></aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="view on" id="v-dashboard">
+    <div class="kpi-row" id="kpi-row"></div>
+    <div>
+      <div class="shdr">
+        <div class="stitle">لمحة عن المجالات</div>
+        <button class="slink" onclick="gv('domains',document.querySelectorAll('.ntab')[1])">عرض الكل ←</button>
+      </div>
+      <div class="dgrid" id="dg-overview"></div>
+    </div>
+    <div class="dpanel" id="detail-dash">
+      <div class="dp-hd">
+        <div class="dp-title" id="dd-title">اختر مجالاً لعرض التفاصيل</div>
+        <div class="dp-hd-r"><span class="badge s-inprog" id="dd-badge">—</span></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col" id="dd-col1"><div class="dp-cl">الإجراءات القادمة</div><div class="dp-item"><div class="dp-dot" style="background:var(--teal)"></div>انقر على مجال أعلاه</div></div>
+        <div class="dp-col" id="dd-col2"><div class="dp-cl">المخاطر والقرارات</div><div class="dp-item"><div class="dp-dot" style="background:var(--amber)"></div>ستظهر هنا التفاصيل</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="shdr">
+        <div class="stitle">ذكاء اليوم</div>
+        <button class="slink" onclick="gv('review',document.querySelectorAll('.ntab')[2])">المراجعة الكاملة ←</button>
+      </div>
+      <div class="igrid">
+        <div class="icard"><div class="icard-hd" style="color:var(--red)">🔴 ما الذي يعيق الحركة؟</div><div class="iitem"><div class="idot" style="background:var(--red)"></div>البنية التقنية لم تُبدأ بعد</div><div class="iitem"><div class="idot" style="background:var(--red)"></div>متطلبات الترخيص من هيئة السياحة غير مؤكدة</div><div class="iitem"><div class="idot" style="background:var(--red)"></div>معالجة المدفوعات الإلكترونية — وضع ضبابي</div></div>
+        <div class="icard"><div class="icard-hd" style="color:var(--amber)">🟡 ما الذي يحتاج قراراً؟</div><div class="iitem"><div class="idot" style="background:var(--amber)"></div>نموذج الإيراد: عمولة أم اشتراك أم هجين؟</div><div class="iitem"><div class="idot" style="background:var(--amber)"></div>تحديد سقف الوديعة ومرونة الإلغاء</div><div class="iitem"><div class="idot" style="background:var(--amber)"></div>أيهما يُطلق أولاً: ينبو أم أملج؟</div></div>
+        <div class="icard"><div class="icard-hd" style="color:var(--teal)">🟢 ما الذي يسير بشكل جيد؟</div><div class="iitem"><div class="idot" style="background:var(--teal)"></div>إجراء الحجز (SOP) مكتمل وجاهز للاختبار</div><div class="iitem"><div class="idot" style="background:var(--teal)"></div>الفهم الاستراتيجي للسوق ناضج</div><div class="iitem"><div class="idot" style="background:var(--teal)"></div>خطة العمل تغطي المراحل الأربع بوضوح</div></div>
+        <div class="icard"><div class="icard-hd" style="color:var(--blue)">🔵 ما الذي يتراجع أو يغيب؟</div><div class="iitem"><div class="idot" style="background:var(--blue)"></div>الميزانية التشغيلية التفصيلية لم تُحدد</div><div class="iitem"><div class="idot" style="background:var(--blue)"></div>تحليل المنافسين المباشرين مفقود</div><div class="iitem"><div class="idot" style="background:var(--blue)"></div>استراتيجية الهوية البصرية غائبة</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOMAINS -->
+  <div class="view" id="v-domains">
+    <div>
+      <div class="shdr">
+        <div class="stitle">جميع المجالات التشغيلية</div>
+        <div class="toolbar">
+          <button class="tbr-btn tbr-add" onclick="openAddDomain()">＋ إضافة مجال</button>
+          <button class="tbr-btn tbr-export" onclick="exportData()">↓ تصدير JSON</button>
+        </div>
+      </div>
+      <div class="tab-row" id="filter-tabs" style="margin-bottom:12px"></div>
+      <div class="dgrid" id="dg-all"></div>
+    </div>
+    <div class="dpanel" id="detail-domains">
+      <div class="dp-hd">
+        <div class="dp-title" id="ddom-title">اختر مجالاً لعرض التفاصيل</div>
+        <div class="dp-hd-r"><span class="badge s-inprog" id="ddom-badge">—</span></div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-col" id="ddom-col1"><div class="dp-cl">الإجراءات القادمة</div><div class="dp-item"><div class="dp-dot" style="background:var(--teal)"></div>انقر على مجال أعلاه</div></div>
+        <div class="dp-col" id="ddom-col2"><div class="dp-cl">المخاطر والقرارات</div><div class="dp-item"><div class="dp-dot" style="background:var(--amber)"></div>ستظهر هنا التفاصيل</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW -->
+  <div class="view" id="v-review">
+    <div>
+      <div class="shdr"><div class="stitle">المراجعة اليومية التنفيذية</div></div>
+      <div class="igrid">
+        <div class="icard"><div class="icard-hd" style="color:var(--teal)">① ما الذي يهم أكثر الآن؟</div><div class="iitem"><div class="idot" style="background:var(--teal)"></div>اكتمال السير التشغيلية الأساسية (SOP) واختبارها</div><div class="iitem"><div class="idot" style="background:var(--teal)"></div>بناء شبكة المشغّلين الأوليين في ينبو وأملج</div><div class="iitem"><div class="idot" style="background:var(--teal)"></div>تحديد نموذج الإيراد النهائي وتثبيته</div></div>
+        <div class="icard"><div class="icard-hd" style="color:var(--red)">② ما الذي يعيق الحركة؟</div><div class="iitem"><div class="idot" style="background:var(--red)"></div>غياب تأكيد متطلبات هيئة السياحة</div><div class="iitem"><div class="idot" style="background:var(--red)"></div>لوحة التحكم التقنية لم تُبدأ بعد</div><div class="iitem"><div class="idot" style="background:var(--red)"></div>لا يوجد منسّق تشغيلي داعم حتى الآن</div></div>
+        <div class="icard"><div class="icard-hd" style="color:var(--amber)">③ ما الذي ينتظر قراراً؟</div><div class="iitem"><div class="idot" style="background:var(--amber)"></div>نموذج الإيراد: عمولة أم اشتراك أم هجين؟</div><div class="iitem"><div class="idot" style="background:var(--amber)"></div>بروتوكول إلغاءات اللحظة الأخيرة للمشغّلين</div><div class="iitem"><div class="idot" style="background:var(--amber)"></div>معايير قبول المشغّل في المرحلة التجريبية</div></div>
+        <div class="icard"><div class="icard-hd" style="color:var(--blue)">④ ما الذي يتراجع أو يغيب؟</div><div class="iitem"><div class="idot" style="background:var(--blue)"></div>ميزانية تشغيلية تفصيلية لم تُحدد بعد</div><div class="iitem"><div class="idot" style="background:var(--blue)"></div>تحليل منافسين مباشرين مفقود كلياً</div><div class="iitem"><div class="idot" style="background:var(--blue)"></div>خطة الطوارئ لحالات فشل المشغّل غير موثّقة</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="shdr"><div class="stitle">مؤشرات النضج الأسبوعي</div></div>
+      <div class="matgrid" id="matgrid"></div>
+    </div>
+  </div>
+
+  <!-- RISKS -->
+  <div class="view" id="v-risks">
+    <div>
+      <div class="shdr"><div class="stitle">مصفوفة المخاطر الرئيسية</div></div>
+      <div class="lcard">
+        <div class="lrow"><div class="ptag ph">عالٍ</div><div class="ltext">مقاومة المشغّلين المخفية للنظام المركزي — قد يتبنّون الواجهة ظاهرياً ويتجاوزون المنطق داخلياً</div><div class="ldomain">الاستراتيجية</div></div>
+        <div class="lrow"><div class="ptag ph">عالٍ</div><div class="ltext">متطلبات الترخيص القانونية غير محددة — قد تُعرقل تشغيل بوابة المدفوعات أو تأخّر الانطلاق</div><div class="ldomain">القانونية</div></div>
+        <div class="lrow"><div class="ptag pm">متوسط</div><div class="ltext">موسمية الطلب الشديدة تُضعف إيرادات الأشهر الأولى وتضغط على السيولة التشغيلية</div><div class="ldomain">المالية</div></div>
+        <div class="lrow"><div class="ptag pm">متوسط</div><div class="ltext">الاعتماد المفرط على واتساب يُنشئ معرفة قبلية غير موثّقة يصعب نقلها لاحقاً</div><div class="ldomain">التشغيل</div></div>
+        <div class="lrow"><div class="ptag pl">منخفض</div><div class="ltext">تحمّل المؤسس وحده عبء التنسيق الكامل يرفع احتمال الإرهاق ونقاط الفشل الفردي</div><div class="ldomain">الموارد البشرية</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="shdr"><div class="stitle">القرارات الحرجة المعلّقة</div></div>
+      <div class="lcard">
+        <div class="lrow"><div class="ptag pu">عاجل</div><div class="ltext">نموذج الإيراد: عمولة % على كل حجز، أم اشتراك ثابت شهري، أم نموذج هجين؟</div><div class="ldomain">المالية</div></div>
+        <div class="lrow"><div class="ptag pu">عاجل</div><div class="ltext">هل يُلزَم المشغّل بتحديث التوفر يومياً أم يكفي التحقق عند ورود كل حجز؟</div><div class="ldomain">التشغيل</div></div>
+        <div class="lrow"><div class="ptag pm">مهم</div><div class="ltext">كم ساعة تُمنح للمشغّل للرد قبل نقل الحجز تلقائياً لمشغّل آخر؟</div><div class="ldomain">التشغيل</div></div>
+        <div class="lrow"><div class="ptag pm">مهم</div><div class="ltext">أيهما يُطلق أولاً في المرحلة التجريبية: ينبو أم أملج؟</div><div class="ldomain">الاستراتيجية</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KNOWLEDGE -->
+  <div class="view" id="v-knowledge">
+    <div>
+      <div class="shdr"><div class="stitle">قاعدة المعرفة والذاكرة الاستراتيجية</div></div>
+      <div class="kvgrid">
+        <div class="kvc"><div class="kvtag" style="background:var(--teal-s);color:var(--teal)">✓ رؤية جوهرية</div><div class="kvbody">المنتج الحقيقي ليس الجدولة — بل تطبيق الالتزام تحت الحوافز الاجتماعية المتغيرة. الثقة البنيوية أهم من البرمجيات.</div><div class="kvsrc">المفاهيم الجوهرية — مايو 2026</div></div>
+        <div class="kvc"><div class="kvtag" style="background:var(--blue-s);color:var(--blue)">📌 تحقق ميداني</div><div class="kvbody">SOP الحجز مكتمل من المرحلة الأولى حتى السادسة — يمثّل أول أصل تشغيلي قابل للاختبار الميداني الفوري.</div><div class="kvsrc">SOP الحجوزات — مايو 2026</div></div>
+        <div class="kvc"><div class="kvtag" style="background:var(--amber-s);color:var(--amber)">⚡ تحذير استراتيجي</div><div class="kvbody">الرضا المُعلن ليس مؤشراً على التغيير السلوكي. المشغّل يشكو من الفوضى لكن الفوضى تمنحه مرونة يحتاجها.</div><div class="kvsrc">المفاهيم الجوهرية</div></div>
+        <div class="kvc"><div class="kvtag" style="background:var(--sage-s);color:var(--sage)">💰 مرجع مالي</div><div class="kvbody">سنة 1: 250,000–500,000 ريال. سنة 2: 800,000–1.5 مليون. سنة 3: 2–4 ملايين. التعادل: 18–30 شهراً.</div><div class="kvsrc">خطة العمل</div></div>
+        <div class="kvc"><div class="kvtag" style="background:var(--violet-s);color:var(--violet)">❓ سؤال مفتوح</div><div class="kvbody">كيف يُصمَّم النظام بحيث المشاركة الصادقة للمشغّل تُعزّز ميزته التنافسية بدلاً من أن تُضعفها؟</div><div class="kvsrc">سؤال استراتيجي محوري — غير محلول</div></div>
+        <div class="kvc"><div class="kvtag" style="background:var(--rose-s);color:var(--rose)">⚠ افتراض خاطئ</div><div class="kvbody">المشغّلون لا يريدون الجدولة المنظّمة — يريدون أقصى مرونة بأقل إلزام. المركزية تُقلّص تحكمهم غير الرسمي.</div><div class="kvsrc">المفاهيم الجوهرية</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="view" id="v-roadmap">
+    <div>
+      <div class="shdr"><div class="stitle">خارطة الطريق التشغيلية — المراحل الأربع</div></div>
+      <div class="rmcard">
+        <div class="rm-pb"><div class="rm-pf" style="width:18%"></div><div class="rm-pt" style="right:18%"></div></div>
+        <div class="rm-phases">
+          <div class="rm-ph now"><div class="rm-ph-n">المرحلة الأولى — الحالية</div><div class="rm-ph-t">التأسيس (0–6 أشهر)</div><div class="rm-item rm-ok">✓ SOP الحجز مكتمل</div><div class="rm-item">التحقق من السير التشغيلية</div><div class="rm-item">بناء شبكة المشغّلين الأوليين</div><div class="rm-item">اختبار نموذج الإيراد</div></div>
+          <div class="rm-ph"><div class="rm-ph-n">المرحلة الثانية</div><div class="rm-ph-t">الأتمتة (6–12 شهراً)</div><div class="rm-item">لوحة تحكم تشغيلية</div><div class="rm-item">توحيد سير الحجز رقمياً</div><div class="rm-item">نظام التقييم والموثوقية</div></div>
+          <div class="rm-ph"><div class="rm-ph-n">المرحلة الثالثة</div><div class="rm-ph-t">التوسع (12–24 شهراً)</div><div class="rm-item">توسع إقليمي مضبوط</div><div class="rm-item">زيادة درجة الأتمتة</div><div class="rm-item">بناء العلامة التجارية</div></div>
+          <div class="rm-ph"><div class="rm-ph-n">المرحلة الرابعة</div><div class="rm-ph-t">المنصة (24–48 شهراً)</div><div class="rm-item">بنية تحتية قابلة للتوسع</div><div class="rm-item">تطبيق موبايل</div><div class="rm-item">جدولة بمساعدة الذكاء الاصطناعي</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- DOMAIN MODAL -->
+<div class="overlay hidden" id="domain-modal">
+<div class="modal">
+  <div class="modal-hd">
+    <div class="modal-title" id="dm-title">إضافة مجال جديد</div>
+    <button class="modal-close" onclick="closeModal('domain-modal')">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="frow">
+      <div class="fgroup"><label class="flabel">اسم المجال</label><input class="finput" id="dm-name" placeholder="مثال: التسويق الرقمي"></div>
+      <div class="fgroup"><label class="flabel">الأيقونة</label><input class="finput" id="dm-icon" placeholder="🌐" maxlength="4" style="font-size:18px;text-align:center"></div>
+    </div>
+    <div class="fgroup"><label class="flabel">الحالة الحالية</label>
+      <select class="fselect" id="dm-status">
+        <option value="inprog">قيد التنفيذ</option><option value="explore">استكشاف</option>
+        <option value="blocked">محظور</option><option value="wait">انتظار قرار</option>
+        <option value="stable">مستقر</option><option value="research">بحث مطلوب</option>
+        <option value="struct">هيكلة</option>
+      </select>
+    </div>
+    <div class="fgroup"><label class="flabel">نسبة النضج (%)</label>
+      <div class="frange-wrap">
+        <input type="range" class="frange" id="dm-pct" min="0" max="100" value="10" oninput="document.getElementById('dm-pct-val').textContent=this.value+'%'">
+        <span class="frange-val" id="dm-pct-val">10%</span>
+      </div>
+    </div>
+    <div class="fgroup"><label class="flabel">لون المجال</label><div class="color-grid" id="color-picker"></div></div>
+    <div class="fgroup"><label class="flabel">الإجراء القادم الرئيسي</label><input class="finput" id="dm-next" placeholder="ما هو أهم خطوة قادمة؟"></div>
+    <div class="fgroup">
+      <label class="flabel">الإجراءات المفصّلة</label>
+      <div class="ftag-list" id="dm-actions-list"></div>
+      <div class="ftag-add-row"><input class="ftag-inp" id="dm-actions-inp" placeholder="أضف إجراءً..." onkeydown="if(event.key==='Enter')addTag('dm-actions')"><button class="ftag-add" onclick="addTag('dm-actions')">＋</button></div>
+    </div>
+    <div class="fgroup">
+      <label class="flabel">المخاطر</label>
+      <div class="ftag-list" id="dm-risks-list"></div>
+      <div class="ftag-add-row"><input class="ftag-inp" id="dm-risks-inp" placeholder="أضف مخاطرة..." onkeydown="if(event.key==='Enter')addTag('dm-risks')"><button class="ftag-add" onclick="addTag('dm-risks')">＋</button></div>
+    </div>
+    <div class="fgroup">
+      <label class="flabel">القرارات المعلّقة</label>
+      <div class="ftag-list" id="dm-decisions-list"></div>
+      <div class="ftag-add-row"><input class="ftag-inp" id="dm-decisions-inp" placeholder="أضف قراراً معلّقاً..." onkeydown="if(event.key==='Enter')addTag('dm-decisions')"><button class="ftag-add" onclick="addTag('dm-decisions')">＋</button></div>
+    </div>
+    <div class="fgroup"><label class="flabel">عدد العقبات</label><input type="number" class="finput" id="dm-blockers" min="0" max="99" value="0" style="width:80px"></div>
+  </div>
+  <div class="modal-ft">
+    <button class="btn-danger hidden" id="dm-delete-btn" onclick="deleteDomain()">حذف المجال</button>
+    <button class="btn-secondary" onclick="closeModal('domain-modal')">إلغاء</button>
+    <button class="btn-primary" onclick="saveDomain()">حفظ</button>
+  </div>
+</div>
+</div>
+
+<!-- CONFIRM -->
+<div class="overlay hidden" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">تأكيد الحذف</div>
+    <div class="confirm-msg" id="confirm-msg">هل أنت متأكد؟</div>
+    <div class="confirm-btns">
+      <button class="btn-secondary" onclick="closeModal('confirm-overlay')">إلغاء</button>
+      <button class="btn-primary" style="background:var(--red);color:#fff" id="confirm-ok">تأكيد الحذف</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   JSONBIN CONFIG
+══════════════════════════════════════════ */
+const API_KEY  = '$2a$10$8nhwXShSPNT732TqOQJdHOrMtupPcwRk1X/r4nn0l1CmT3hpgaQlG';
+const BASE_URL = 'https://api.jsonbin.io/v3/b';
+const LS_BIN   = 'marine_bin_id';
+const LS_DATA  = 'marine_data_cache';
+let   BIN_ID   = localStorage.getItem(LS_BIN) || null;
+let   saveTimer = null;
+let   isSaving  = false;
+
+/* ══════════════════════════════════════════
+   SYNC UI
+══════════════════════════════════════════ */
+function setSyncState(state, msg) {
+  const el = document.getElementById('sync-badge');
+  el.className = 'sync-badge sync-' + state;
+  const icons = { ok:'☁', saving:'<span class="spin-icon">↻</span>', err:'⚠', load:'<span class="spin-icon">↻</span>' };
+  el.innerHTML = (icons[state]||'') + ' ' + msg;
+}
+
+/* ══════════════════════════════════════════
+   JSONBIN API
+══════════════════════════════════════════ */
+async function createBin(data) {
+  const res = await fetch(BASE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Name':'marine-command-center', 'X-Bin-Private':'false' },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('فشل إنشاء قاعدة البيانات');
+  const json = await res.json();
+  return json.metadata.id;
+}
+
+async function readBin() {
+  if (!BIN_ID) return null;
+  const res = await fetch(`${BASE_URL}/${BIN_ID}/latest`, {
+    headers: { 'X-Master-Key': API_KEY }
+  });
+  if (!res.ok) throw new Error('فشل قراءة البيانات');
+  const json = await res.json();
+  return json.record;
+}
+
+async function writeBin(data) {
+  if (!BIN_ID) {
+    BIN_ID = await createBin(data);
+    localStorage.setItem(LS_BIN, BIN_ID);
+    return;
+  }
+  const res = await fetch(`${BASE_URL}/${BIN_ID}`, {
+    method: 'PUT',
+    headers: { 'Content-Type':'application/json', 'X-Master-Key': API_KEY },
+    body: JSON.stringify(data)
+  });
+  if (!res.ok) throw new Error('فشل حفظ البيانات');
+}
+
+/* ══════════════════════════════════════════
+   LOAD & SAVE FLOW
+══════════════════════════════════════════ */
+async function loadData() {
+  setSyncState('load', 'جارٍ التحميل...');
+  try {
+    let data = await readBin();
+    if (!data || !data.domains) {
+      // First time — create bin with defaults
+      data = { domains: JSON.parse(JSON.stringify(DEFAULT_DOMAINS)) };
+      BIN_ID = await createBin(data);
+      localStorage.setItem(LS_BIN, BIN_ID);
+    }
+    STATE = data;
+    localStorage.setItem(LS_DATA, JSON.stringify(STATE));
+    setSyncState('ok', 'محفوظ على السحابة ☁');
+  } catch(e) {
+    // Fall back to local cache
+    const cached = localStorage.getItem(LS_DATA);
+    if (cached) {
+      STATE = JSON.parse(cached);
+      setSyncState('err', 'وضع غير متصل — بيانات محلية');
+      toast('⚠ تعذّر الاتصال بالسحابة — تعمل محلياً');
+    } else {
+      STATE = { domains: JSON.parse(JSON.stringify(DEFAULT_DOMAINS)) };
+      setSyncState('err', 'وضع غير متصل');
+    }
+  }
+  renderAll();
+}
+
+function scheduleSave() {
+  localStorage.setItem(LS_DATA, JSON.stringify(STATE)); // always save locally first
+  clearTimeout(saveTimer);
+  setSyncState('saving', 'جارٍ الحفظ...');
+  saveTimer = setTimeout(pushSave, 1200); // debounce 1.2s
+}
+
+async function pushSave() {
+  if (isSaving) return;
+  isSaving = true;
+  try {
+    await writeBin(STATE);
+    setSyncState('ok', 'محفوظ على السحابة ☁');
+    const now = new Date();
+    const t = [now.getHours(),now.getMinutes()].map(x=>String(x).padStart(2,'0')).join(':');
+    document.getElementById('sync-badge').title = `آخر حفظ: ${t}`;
+  } catch(e) {
+    setSyncState('err', 'فشل الحفظ — يُعاد المحاولة');
+    setTimeout(pushSave, 5000);
+  } finally {
+    isSaving = false;
+  }
+}
+
+/* ══════════════════════════════════════════
+   OFFLINE DETECTION
+══════════════════════════════════════════ */
+window.addEventListener('offline', () => {
+  document.getElementById('offline-bar').classList.add('show');
+  setSyncState('err', 'غير متصل');
+});
+window.addEventListener('online', () => {
+  document.getElementById('offline-bar').classList.remove('show');
+  pushSave();
+});
+
+/* ══════════════════════════════════════════
+   COLORS & STATUS
+══════════════════════════════════════════ */
+const COLORS = ['#00d4aa','#4a9eff','#f0a500','#e85050','#9b7fe8','#e8749b','#5ec97e','#ff7043','#29b6f6','#ab47bc','#26a69a','#ef5350'];
+const STATUS = {
+  inprog:  {label:'قيد التنفيذ',cls:'s-inprog'},
+  blocked: {label:'محظور',      cls:'s-blocked'},
+  explore: {label:'استكشاف',    cls:'s-explore'},
+  wait:    {label:'انتظار قرار',cls:'s-wait'},
+  stable:  {label:'مستقر',      cls:'s-stable'},
+  research:{label:'بحث مطلوب',  cls:'s-research'},
+  struct:  {label:'هيكلة',      cls:'s-struct'},
+};
+function statusColor(s){const m={inprog:'var(--teal)',blocked:'var(--red)',explore:'var(--blue)',wait:'var(--amber)',stable:'var(--violet)',research:'var(--rose)',struct:'var(--sage)'};return m[s]||'var(--t3)'}
+
+/* ══════════════════════════════════════════
+   DEFAULT DATA
+══════════════════════════════════════════ */
+const DEFAULT_DOMAINS = [
+  {id:'d1',name:'الاستراتيجية',icon:'🧭',status:'inprog',pct:35,color:'#00d4aa',blockers:1,next:'توثيق التحليل التنافسي وتعريف عرض القيمة',actions:['توثيق التحليل التنافسي','صياغة عرض القيمة الفريد (UVP)','تحديد معايير النجاح للمرحلة الأولى'],risks:['غياب بيانات منافسين مباشرين محددة','الافتراضات عن سلوك المشغّل غير مختبرة'],decisions:['هل نركّز على المشغّلين أم العملاء أولاً؟']},
+  {id:'d2',name:'التشغيل',icon:'⚙️',status:'inprog',pct:45,color:'#4a9eff',blockers:0,next:'اختبار SOP الحجز كاملاً من البداية للنهاية',actions:['اختبار SOP الحجز مع أول مشغّل حقيقي','تحديد أول 3 مشغّلين للمرحلة التجريبية','مراجعة نموذج العمولة'],risks:['مقاومة المشغّلين للجداول الصارمة','احتمال حجز مزدوج في بداية العمل'],decisions:['هل يُجبَر المشغّل على تحديث يومي؟','مدة الودية قبل إلغاء الحجز تلقائياً']},
+  {id:'d3',name:'نظام الحجوزات',icon:'📅',status:'inprog',pct:60,color:'#f0a500',blockers:0,next:'تنفيذ SOP ميدانياً مع مشغّل فعلي',actions:['تنفيذ SOP ميدانياً','اختبار بوابة الدفع وتحصيل الودائع','تدريب أول منسّق على إجراءات النظام'],risks:['اعتماد واتساب يُعقّد الأتمتة لاحقاً'],decisions:['آلية التحقق من التوفر الفوري للمشغّل']},
+  {id:'d4',name:'التقنية والمنصة',icon:'💻',status:'blocked',pct:15,color:'#e85050',blockers:2,next:'تحديد المكدس التقني والاتفاق مع مطوّر',actions:['تحديد المكدس التقني المناسب','الاتفاق مع مطوّر أو شركة برمجية','بدء تصميم لوحة التحكم'],risks:['التطوير قبل التحقق يُضيّع موارد'],decisions:['بناء داخلي أم منصة No-Code؟']},
+  {id:'d5',name:'التسويق والنمو',icon:'📣',status:'explore',pct:25,color:'#e8749b',blockers:0,next:'بناء حضور على انستغرام وتيك توك',actions:['بناء حضور على انستغرام وتيك توك','تحديد شراكات مع الفنادق والمراسي'],risks:['إطلاق مبكر قبل جاهزية العمليات يُضر بالسمعة'],decisions:['هل يُطلق التسويق قبل أم بعد التحقق التشغيلي؟']},
+  {id:'d6',name:'المالية والتمويل',icon:'💰',status:'wait',pct:30,color:'#5ec97e',blockers:1,next:'إعداد ميزانية تشغيلية تفصيلية',actions:['إعداد ميزانية تشغيلية تفصيلية','فتح حساب تجاري للشركة'],risks:['ضغط السيولة في الأشهر الأولى'],decisions:['نموذج الإيراد: عمولة أم اشتراك أم هجين؟']},
+  {id:'d7',name:'القانونية والتراخيص',icon:'⚖️',status:'blocked',pct:10,color:'#e85050',blockers:1,next:'التواصل مع هيئة السياحة',actions:['التواصل مع هيئة السياحة','استشارة محامٍ متخصص'],risks:['التأخر في التراخيص يُعرقل الانطلاق'],decisions:['هيكل الكيان: مؤسسة فردية أم شركة؟']},
+  {id:'d8',name:'اللوجستيات البحرية',icon:'⛵',status:'research',pct:20,color:'#9b7fe8',blockers:0,next:'مسح المشغّلين في ينبو وأملج',actions:['إجراء مسح ميداني للمشغّلين','توثيق أنواع القوارب المتاحة'],risks:['تباين كبير في مستوى المشغّلين'],decisions:['ما معايير قبول المشغّل في المرحلة الأولى؟']},
+  {id:'d9',name:'تجربة العميل',icon:'🌟',status:'explore',pct:20,color:'#00d4aa',blockers:0,next:'رسم خارطة رحلة العميل الكاملة',actions:['رسم خارطة رحلة العميل','تصميم تجربة تواصل عبر واتساب'],risks:['توقعات عالية قد لا تتحقق في البداية'],decisions:['ما هو الوعد الأساسي للعميل؟']},
+  {id:'d10',name:'إدارة الإجراءات SOP',icon:'📋',status:'stable',pct:65,color:'#9b7fe8',blockers:0,next:'توسيع SOP لسيناريوهات الطوارئ',actions:['توسيع SOP لتغطي سيناريوهات الطوارئ','توثيق SOP التعامل مع المشغّل الغائب'],risks:['SOP تحتاج اختباراً ميدانياً فعلياً'],decisions:['من المسؤول عن مراجعة SOP دورياً؟']},
+  {id:'d11',name:'الشراكات',icon:'🤝',status:'explore',pct:15,color:'#4a9eff',blockers:0,next:'قائمة الفنادق والجهات المستهدفة',actions:['إعداد قائمة الفنادق والمنتجعات','التواصل مع مراكز الغوص'],risks:['الشراكات المبكرة تُنشئ التزامات قبل الجاهزية'],decisions:['ما الشراكات التي تُطلق في المرحلة الأولى؟']},
+  {id:'d12',name:'الموارد البشرية',icon:'👥',status:'wait',pct:10,color:'#5ec97e',blockers:0,next:'قرار التوظيف الأول: منسّق تشغيلي',actions:['تحديد ما إذا كان منسّق مطلوباً الآن','صياغة وصف وظيفي للأدوار الأولى'],risks:['إرهاق المؤسس من تحمّل التنسيق وحيداً'],decisions:['توظيف منسّق في المرحلة الأولى أم لا؟']},
+  {id:'d13',name:'إدارة المخاطر',icon:'🛡',status:'inprog',pct:40,color:'#f0a500',blockers:0,next:'إكمال مصفوفة المخاطر التفصيلية',actions:['إكمال مصفوفة المخاطر','إعداد خطة طوارئ لفشل المشغّل'],risks:['المخاطر البحرية تحتاج تغطية تأمينية'],decisions:['ما نوع التأمين المطلوب؟']},
+  {id:'d14',name:'التوسع والانتشار',icon:'🗺',status:'explore',pct:10,color:'#00d4aa',blockers:0,next:'تحديد معايير الدخول لمناطق جديدة',actions:['تحديد معايير واضحة للتوسع','بحث المناطق الساحلية ذات الأولوية'],risks:['التوسع المبكر قبل ثبات النموذج يُشتت الموارد'],decisions:['ما الحد الأدنى من النضج قبل التوسع؟']},
+];
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+let STATE = { domains: [] };
+let editingId = null;
+let pendingDeleteId = null;
+let tagBuffers = {'dm-actions':[],'dm-risks':[],'dm-decisions':[]};
+let selectedColor = COLORS[0];
+let activeDetail = null; // [panelId,titleId,badgeId,col1Id,col2Id,cardEl,gridId]
+
+/* ══════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════ */
+function uid(){return 'd'+Date.now()+Math.random().toString(36).slice(2,6)}
+
+function renderAll(){
+  renderKPIs();
+  renderSidebar();
+  renderDomainGrid('dg-overview',STATE.domains.slice(0,6),'detail-dash','dd-title','dd-badge','dd-col1','dd-col2');
+  renderDomainGrid('dg-all',STATE.domains,'detail-domains','ddom-title','ddom-badge','ddom-col1','ddom-col2');
+  renderFilterTabs();
+  renderMatGrid();
+}
+
+function renderKPIs(){
+  const total=STATE.domains.length;
+  const avg=total?Math.round(STATE.domains.reduce((a,d)=>a+d.pct,0)/total):0;
+  const blocked=STATE.domains.filter(d=>d.status==='blocked').length;
+  const waiting=STATE.domains.filter(d=>d.status==='wait').length;
+  document.getElementById('kpi-row').innerHTML=`
+    <div class="kpi t"><div class="kpi-l">نضج المشروع الكلي</div><div class="kpi-n t">${avg}%</div><div class="kpi-s">عبر ${total} مجالاً تشغيلياً</div></div>
+    <div class="kpi a"><div class="kpi-l">انتظار قرار</div><div class="kpi-n a">${waiting}</div><div class="kpi-s">مجالات تنتظر حسماً</div></div>
+    <div class="kpi r"><div class="kpi-l">مجالات محظورة</div><div class="kpi-n r">${blocked}</div><div class="kpi-s">تتطلب تدخلاً فورياً</div></div>
+    <div class="kpi b"><div class="kpi-l">إجمالي المجالات</div><div class="kpi-n b">${total}</div><div class="kpi-s">مجال تشغيلي مُدار</div></div>`;
+}
+
+function renderSidebar(){
+  const sc={};
+  STATE.domains.forEach(d=>{sc[d.status]=(sc[d.status]||0)+1});
+  document.getElementById('sidebar').innerHTML=`
+    <div>
+      <div class="sb-gl">المجالات</div>
+      <div class="sb-g">
+        <div class="sbi on" onclick="sbClick(this)"><div class="sbi-dot" style="background:var(--t3)"></div>الكل<span class="sbi-ct">${STATE.domains.length}</span></div>
+        ${STATE.domains.map(d=>`<div class="sbi" onclick="sbClick(this)"><div class="sbi-dot" style="background:${d.color}"></div><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.icon} ${d.name}</span><span class="sbi-ct">${d.pct}%</span></div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="sb-gl">إشارات الحالة</div>
+      <div class="sb-g">
+        ${Object.entries(STATUS).filter(([k])=>sc[k]).map(([k,v])=>`<div class="sbi" onclick="sbClick(this)"><div class="sbi-dot" style="background:${statusColor(k)}"></div>${v.label}<span class="sbi-ct">${sc[k]}</span></div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div class="sb-gl">مراجعات مجدولة</div>
+      <div class="sb-g">
+        <div class="sbi" onclick="sbClick(this)"><div class="sbi-dot" style="background:var(--teal)"></div>يومية — اليوم</div>
+        <div class="sbi" onclick="sbClick(this)"><div class="sbi-dot" style="background:var(--amber)"></div>أسبوعية — الأحد</div>
+        <div class="sbi" onclick="sbClick(this)"><div class="sbi-dot" style="background:var(--violet)"></div>قرارات — قريباً</div>
+      </div>
+    </div>`;
+}
+
+function renderDomainGrid(gridId,domains,panelId,titleId,badgeId,col1Id,col2Id){
+  const grid=document.getElementById(gridId);
+  grid.innerHTML='';
+  if(!domains.length){grid.innerHTML=`<div class="empty"><div class="empty-icon">📭</div>لا توجد مجالات بعد</div>`;return}
+  domains.forEach(d=>{
+    const st=STATUS[d.status]||STATUS.explore;
+    const el=document.createElement('div');
+    el.className='dcard';el.dataset.status=d.status;el.dataset.id=d.id;
+    el.innerHTML=`
+      <button class="dc-edit-btn" onclick="event.stopPropagation();openEditDomain('${d.id}')" title="تعديل">✎</button>
+      <div class="dc-r1"><div class="dc-name"><span>${d.icon}</span><span class="dc-name-txt">${d.name}</span></div><span class="badge ${st.cls}">${st.label}</span></div>
+      <div class="dc-bar-t"><div class="dc-bar-f" style="width:${d.pct}%;background:${d.color}"></div></div>
+      <div class="dc-foot"><div class="dc-pct" style="color:${d.color}">${d.pct}%</div><div class="dc-blk">${d.blockers>0?`⚠ ${d.blockers} عقبة`:'✓ لا عقبات'}</div></div>
+      <div class="dc-next">${d.next}</div>`;
+    el.onclick=()=>showDetail(d,panelId,titleId,badgeId,col1Id,col2Id,el,gridId);
+    grid.appendChild(el);
+  });
+}
+
+function showDetail(d,panelId,titleId,badgeId,col1Id,col2Id,cardEl,gridId){
+  activeDetail=[panelId,titleId,badgeId,col1Id,col2Id,cardEl,gridId];
+  document.querySelectorAll(`#${gridId} .dcard`).forEach(c=>c.classList.remove('sel'));
+  cardEl.classList.add('sel');
+  const st=STATUS[d.status]||STATUS.explore;
+  document.getElementById(titleId).textContent=d.icon+' '+d.name;
+  const badge=document.getElementById(badgeId);badge.className='badge '+st.cls;badge.textContent=st.label;
+
+  document.getElementById(col1Id).innerHTML=`
+    <div class="dp-cl">الإجراءات القادمة <button class="slink" style="font-size:11px" onclick="toggleInline('${d.id}','actions','${col1Id}','${col2Id}')">＋ إضافة</button></div>
+    <div id="dp-actions-${d.id}">${(d.actions||[]).map((a,i)=>`<div class="dp-item"><div class="dp-dot" style="background:var(--teal)"></div><span style="flex:1">${a}</span><button class="dp-item-del" onclick="delItem('${d.id}','actions',${i},'${col1Id}','${col2Id}')">✕</button></div>`).join('')}</div>
+    <div id="inline-actions-${d.id}" style="display:none;margin-top:6px"><div class="dp-add-row"><input class="dp-add-input" id="inp-actions-${d.id}" placeholder="أضف إجراءً..." onkeydown="if(event.key==='Enter')saveInline('${d.id}','actions','${col1Id}','${col2Id}')"><button class="dp-add-btn" onclick="saveInline('${d.id}','actions','${col1Id}','${col2Id}')">＋</button></div></div>`;
+
+  document.getElementById(col2Id).innerHTML=`
+    <div class="dp-cl">المخاطر <button class="slink" style="font-size:11px" onclick="toggleInline('${d.id}','risks','${col1Id}','${col2Id}')">＋ إضافة</button></div>
+    <div id="dp-risks-${d.id}">${(d.risks||[]).map((r,i)=>`<div class="dp-item"><div class="dp-dot" style="background:var(--amber)"></div><span style="flex:1">${r}</span><button class="dp-item-del" onclick="delItem('${d.id}','risks',${i},'${col1Id}','${col2Id}')">✕</button></div>`).join('')}</div>
+    <div id="inline-risks-${d.id}" style="display:none;margin-top:6px"><div class="dp-add-row"><input class="dp-add-input" id="inp-risks-${d.id}" placeholder="أضف مخاطرة..." onkeydown="if(event.key==='Enter')saveInline('${d.id}','risks','${col1Id}','${col2Id}')"><button class="dp-add-btn" onclick="saveInline('${d.id}','risks','${col1Id}','${col2Id}')">＋</button></div></div>
+    <div class="dp-cl" style="margin-top:12px">القرارات المعلّقة <button class="slink" style="font-size:11px" onclick="toggleInline('${d.id}','decisions','${col1Id}','${col2Id}')">＋ إضافة</button></div>
+    <div id="dp-decisions-${d.id}">${(d.decisions||[]).map((dec,i)=>`<div class="dp-item"><div class="dp-dot" style="background:var(--blue)"></div><span style="flex:1">${dec}</span><button class="dp-item-del" onclick="delItem('${d.id}','decisions',${i},'${col1Id}','${col2Id}')">✕</button></div>`).join('')}</div>
+    <div id="inline-decisions-${d.id}" style="display:none;margin-top:6px"><div class="dp-add-row"><input class="dp-add-input" id="inp-decisions-${d.id}" placeholder="أضف قراراً معلّقاً..." onkeydown="if(event.key==='Enter')saveInline('${d.id}','decisions','${col1Id}','${col2Id}')"><button class="dp-add-btn" onclick="saveInline('${d.id}','decisions','${col1Id}','${col2Id}')">＋</button></div></div>`;
+}
+
+function toggleInline(domainId,field,c1,c2){
+  const el=document.getElementById(`inline-${field}-${domainId}`);
+  if(el){el.style.display=el.style.display==='none'?'block':'none';}
+  const inp=document.getElementById(`inp-${field}-${domainId}`);
+  if(inp)setTimeout(()=>inp.focus(),50);
+}
+
+function saveInline(domainId,field,c1,c2){
+  const inp=document.getElementById(`inp-${field}-${domainId}`);
+  if(!inp||!inp.value.trim())return;
+  const d=STATE.domains.find(x=>x.id===domainId);if(!d)return;
+  if(!d[field])d[field]=[];
+  d[field].push(inp.value.trim());
+  inp.value='';
+  scheduleSave();
+  if(activeDetail)showDetail(d,...activeDetail.slice(0,5),activeDetail[5],activeDetail[6]);
+  toast('تم الإضافة ✓');
+}
+
+function delItem(domainId,field,idx,c1,c2){
+  const d=STATE.domains.find(x=>x.id===domainId);if(!d||!d[field])return;
+  d[field].splice(idx,1);
+  scheduleSave();
+  if(activeDetail)showDetail(d,...activeDetail.slice(0,5),activeDetail[5],activeDetail[6]);
+  toast('تم الحذف');
+}
+
+function renderFilterTabs(){
+  const counts={all:STATE.domains.length};
+  STATE.domains.forEach(d=>{counts[d.status]=(counts[d.status]||0)+1});
+  document.getElementById('filter-tabs').innerHTML=
+    `<button class="tbtn on" onclick="filterDomains('all',this)">الكل (${counts.all})</button>`+
+    Object.entries(STATUS).filter(([k])=>counts[k]).map(([k,v])=>
+      `<button class="tbtn" onclick="filterDomains('${k}',this)">${v.label} (${counts[k]})</button>`).join('');
+}
+
+function renderMatGrid(){
+  document.getElementById('matgrid').innerHTML=STATE.domains.map(d=>`
+    <div class="mati"><div class="mati-n">${d.icon} ${d.name}</div>
+    <div class="mati-b"><div class="mati-f" style="width:${d.pct}%;background:${d.color}"></div></div>
+    <div class="mati-p" style="color:${d.color}">${d.pct}%</div></div>`).join('');
+}
+
+/* ══════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════ */
+function buildColorPicker(selected){
+  selectedColor=selected;
+  document.getElementById('color-picker').innerHTML=COLORS.map(c=>`<div class="cpick ${c===selected?'sel':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`).join('');
+}
+function pickColor(c){selectedColor=c;document.querySelectorAll('.cpick').forEach(el=>{el.classList.toggle('sel',el.style.background===c||el.style.backgroundColor===c)})}
+
+function renderTagList(key,items){
+  document.getElementById(`${key}-list`).innerHTML=items.map((item,i)=>`<div class="ftag-item"><span class="ftag-item-txt">${item}</span><button class="ftag-del" onclick="removeTag('${key}',${i})">✕</button></div>`).join('');
+}
+function addTag(key){const inp=document.getElementById(`${key}-inp`);const v=inp.value.trim();if(!v)return;tagBuffers[key].push(v);inp.value='';renderTagList(key,tagBuffers[key]);inp.focus()}
+function removeTag(key,idx){tagBuffers[key].splice(idx,1);renderTagList(key,tagBuffers[key])}
+
+function openAddDomain(){
+  editingId=null;
+  document.getElementById('dm-title').textContent='إضافة مجال جديد';
+  document.getElementById('dm-name').value='';
+  document.getElementById('dm-icon').value='🌐';
+  document.getElementById('dm-status').value='explore';
+  document.getElementById('dm-pct').value=10;
+  document.getElementById('dm-pct-val').textContent='10%';
+  document.getElementById('dm-next').value='';
+  document.getElementById('dm-blockers').value=0;
+  document.getElementById('dm-delete-btn').classList.add('hidden');
+  tagBuffers={'dm-actions':[],'dm-risks':[],'dm-decisions':[]};
+  renderTagList('dm-actions',[]);renderTagList('dm-risks',[]);renderTagList('dm-decisions',[]);
+  buildColorPicker(COLORS[0]);
+  document.getElementById('domain-modal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('dm-name').focus(),100);
+}
+
+function openEditDomain(id){
+  const d=STATE.domains.find(x=>x.id===id);if(!d)return;
+  editingId=id;
+  document.getElementById('dm-title').textContent='تعديل المجال';
+  document.getElementById('dm-name').value=d.name;
+  document.getElementById('dm-icon').value=d.icon;
+  document.getElementById('dm-status').value=d.status;
+  document.getElementById('dm-pct').value=d.pct;
+  document.getElementById('dm-pct-val').textContent=d.pct+'%';
+  document.getElementById('dm-next').value=d.next||'';
+  document.getElementById('dm-blockers').value=d.blockers||0;
+  document.getElementById('dm-delete-btn').classList.remove('hidden');
+  tagBuffers={'dm-actions':[...(d.actions||[])],'dm-risks':[...(d.risks||[])],'dm-decisions':[...(d.decisions||[])]};
+  renderTagList('dm-actions',tagBuffers['dm-actions']);
+  renderTagList('dm-risks',tagBuffers['dm-risks']);
+  renderTagList('dm-decisions',tagBuffers['dm-decisions']);
+  buildColorPicker(d.color||COLORS[0]);
+  document.getElementById('domain-modal').classList.remove('hidden');
+}
+
+function saveDomain(){
+  const name=document.getElementById('dm-name').value.trim();
+  if(!name){document.getElementById('dm-name').focus();return}
+  const data={name,icon:document.getElementById('dm-icon').value||'🌐',status:document.getElementById('dm-status').value,pct:parseInt(document.getElementById('dm-pct').value)||0,color:selectedColor,next:document.getElementById('dm-next').value.trim(),blockers:parseInt(document.getElementById('dm-blockers').value)||0,actions:[...tagBuffers['dm-actions']],risks:[...tagBuffers['dm-risks']],decisions:[...tagBuffers['dm-decisions']]};
+  if(editingId){const idx=STATE.domains.findIndex(x=>x.id===editingId);if(idx>-1)STATE.domains[idx]={...STATE.domains[idx],...data};toast('تم التحديث ✓')}
+  else{data.id=uid();STATE.domains.push(data);toast('تم الإضافة ✓')}
+  scheduleSave();closeModal('domain-modal');renderAll();
+}
+
+function deleteDomain(){
+  pendingDeleteId=editingId;
+  const d=STATE.domains.find(x=>x.id===pendingDeleteId);
+  document.getElementById('confirm-msg').textContent=`هل أنت متأكد من حذف مجال "${d?.name}"؟ لا يمكن التراجع.`;
+  document.getElementById('confirm-ok').onclick=confirmDelete;
+  document.getElementById('confirm-overlay').classList.remove('hidden');
+}
+
+function confirmDelete(){
+  STATE.domains=STATE.domains.filter(d=>d.id!==pendingDeleteId);
+  scheduleSave();closeModal('confirm-overlay');closeModal('domain-modal');renderAll();toast('تم الحذف');pendingDeleteId=null;
+}
+
+/* ══════════════════════════════════════════
+   FILTER / NAV / MISC
+══════════════════════════════════════════ */
+function filterDomains(status,btn){
+  document.querySelectorAll('#filter-tabs .tbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  const filtered=status==='all'?STATE.domains:STATE.domains.filter(d=>d.status===status);
+  renderDomainGrid('dg-all',filtered,'detail-domains','ddom-title','ddom-badge','ddom-col1','ddom-col2');
+}
+
+function gv(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('v-'+id).classList.add('on');
+  if(btn)btn.classList.add('on');
+}
+
+function sbClick(el){document.querySelectorAll('.sbi').forEach(i=>i.classList.remove('on'));el.classList.add('on')}
+
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+document.getElementById('domain-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal('domain-modal')});
+document.getElementById('confirm-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal('confirm-overlay')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('domain-modal');closeModal('confirm-overlay')}});
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='marine-command-center-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);toast('تم التصدير ✓');
+}
+
+let toastTimer;
+function toast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>String(x).padStart(2,'0')).join(':');
+}
+setInterval(tick,1000);tick();
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+loadData();
+</script>
+</body>
+</html>
